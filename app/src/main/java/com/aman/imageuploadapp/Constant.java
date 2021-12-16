@@ -5,5 +5,10 @@ package com.aman.imageuploadapp;
  */
 public class Constant {
 
-    public static final String[] pathArray = new String[]{"",""};
+    public static final String pathArray[] = {"/DCIM/Camera","/DCIM/Screenshots","/DCIM"};
+
+    public static final String hostPath = "http://101.132.68.99:8083";
+
+    public static final int imgLimit = 10;
+
 }

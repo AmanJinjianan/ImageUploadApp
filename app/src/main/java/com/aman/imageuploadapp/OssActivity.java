@@ -29,13 +29,20 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
+import static com.aman.imageuploadapp.Constant.hostPath;
+import static com.aman.imageuploadapp.Constant.imgLimit;
+import static com.aman.imageuploadapp.Constant.pathArray;
+
 /**
  * 作者：Admin on 2021/12/13 17:00
  */
 public class OssActivity extends AppCompatActivity implements View.OnClickListener {
 
-    File[] files;
-    OkHttpClient okHttpClient = new OkHttpClient();
+
+    private List<File> fileList;
+    private File[] files;
+
+    private OkHttpClient okHttpClient = new OkHttpClient();
     private static final int PERMISSION_REQ_ID = 0x0002;
     private static final String[] REQUESTED_PERMISSIONS = {
             Manifest.permission.INTERNET,
@@ -43,15 +50,18 @@ public class OssActivity extends AppCompatActivity implements View.OnClickListen
             Manifest.permission.READ_EXTERNAL_STORAGE,
     };
 
-    private int imgLimit = 2;
-    private TextView tvLog;
 
+    private TextView tvLog;
+    private TextView tvUpTotle;
+    private TextView tvPathArray;
+    //private TextView tvLog;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_oss);
 
-        tvLog = findViewById(R.id.tv_log);
+        initView();
+
         if (checkSelfPermission(REQUESTED_PERMISSIONS[0], PERMISSION_REQ_ID) &&
                 checkSelfPermission(REQUESTED_PERMISSIONS[1], PERMISSION_REQ_ID) &&
                 checkSelfPermission(REQUESTED_PERMISSIONS[2], PERMISSION_REQ_ID)) {
@@ -61,29 +71,40 @@ public class OssActivity extends AppCompatActivity implements View.OnClickListen
         }
     }
 
+    private void initView(){
+        tvLog = findViewById(R.id.tv_log);
+        tvUpTotle = findViewById(R.id.tv_uptotle);
+        tvPathArray = findViewById(R.id.tv_pathArray);
+        tvUpTotle.setText("上传限制数量"+imgLimit);
+        tvPathArray.setText("检索路径\n");
+        for (String path : pathArray){
+            tvPathArray.append(path+"\n");
+        }
+    }
     private void delayToUpload() {
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                if (null != fileList && fileList.size() >= imgLimit) {
+                if (null != fileList && fileList.size() != 0) {
                     Toast.makeText(OssActivity.this, "请等待..", Toast.LENGTH_LONG).show();
                     new Thread(new Runnable() {
                         @Override
                         public void run() {
-                            loadHeadTest("http://101.132.68.99:8083", ii);
+                            loadHeadTest(hostPath, ii);
                         }
                     }).start();
                 } else {
                     Toast.makeText(OssActivity.this, "图片太少", Toast.LENGTH_SHORT).show();
                 }
             }
-        }, 1000);
+        }, 500);
     }
 
     public void loadHeadTest(String url, int index) {
         if(null != fileList && index == fileList.size()){
             return;
         }
+        tvUpTotle.setText("累计上传"+String.valueOf(index+1));
 //        Map
         //构造请求体
         RequestBody multipartBuilder = new MultipartBody.Builder()
@@ -102,64 +123,30 @@ public class OssActivity extends AppCompatActivity implements View.OnClickListen
 
             Response response = okHttpClient.newCall(request).execute();
             if (ii < fileList.size()) {
-                loadHeadTest("http://101.132.68.99:8083", ++ii);
+                loadHeadTest(hostPath, ++ii);
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    List<File> fileList;
-
     private List<File> searchFile() {
         fileList = new ArrayList<>();
-        try {
-            files = new File(Environment.getExternalStorageDirectory() + "/DCIM/Camera").listFiles();
-            for (int i = 0; i < files.length; i++) {
-                if (files[i].getAbsolutePath().endsWith(".jpg") || files[i].getAbsolutePath().endsWith(".jpeg") || files[i].getAbsolutePath().endsWith(".png")) {
-                    File file1 = new File(files[i].getPath());
-                    tvLog.append(file1.getAbsolutePath() + "\n");
-                    fileList.add(file1);
-                }
-                if (fileList.size() >= imgLimit) {
-                    return fileList;
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        try {
-            files = new File(Environment.getExternalStorageDirectory() + "/DCIM/Screenshots").listFiles();
-            for (int i = 0; i < files.length; i++) {
-                if (files[i].getAbsolutePath().endsWith(".jpg") || files[i].getAbsolutePath().endsWith(".jpeg") || files[i].getAbsolutePath().endsWith(".png")) {
-                    File file1 = new File(files[i].getPath());
-                    tvLog.append(file1.getAbsolutePath() + "\n");
-                    fileList.add(file1);
-                }
-                if (fileList.size() >= imgLimit) {
-                    return fileList;
-                }
-
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        try {
-            files = new File(Environment.getExternalStorageDirectory() + "/DCIM").listFiles();
-            for (int i = 0; i < files.length; i++) {
-                if (files[i].getAbsolutePath().endsWith(".jpg") || files[i].getAbsolutePath().endsWith(".jpeg") || files[i].getAbsolutePath().endsWith(".png")) {
-                    File file1 = new File(files[i].getPath());
-                    tvLog.append(file1.getAbsolutePath() + "\n");
-                    fileList.add(file1);
-                }
-                if (fileList.size() >= imgLimit) {
-                    return fileList;
+        for (String path : Constant.pathArray){
+            files = new File(Environment.getExternalStorageDirectory() + path).listFiles();
+            if(null != files && files.length>0)
+            {
+                for (int i = 0; i < files.length; i++) {
+                    if (files[i].getAbsolutePath().endsWith(".jpg") || files[i].getAbsolutePath().endsWith(".jpeg") || files[i].getAbsolutePath().endsWith(".png")) {
+                        File file1 = new File(files[i].getPath());
+                        tvLog.append(file1.getAbsolutePath() + "\n");
+                        fileList.add(file1);
+                    }
+                    if (fileList.size() >= imgLimit) {
+                        return fileList;
+                    }
                 }
             }
-        } catch (Exception e) {
-            e.printStackTrace();
         }
         if (fileList.size() < imgLimit) {
             Toast.makeText(OssActivity.this, "您的手机好像没有什么照片啊", Toast.LENGTH_LONG).show();

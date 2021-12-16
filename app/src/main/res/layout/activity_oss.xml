@@ -9,7 +9,7 @@
     tools:context=".MainActivity">
 
     <androidx.appcompat.widget.LinearLayoutCompat
-        android:layout_weight="1"
+        android:layout_weight="3"
         android:layout_width="0dp"
         android:layout_height="match_parent">
         <TextView
@@ -19,7 +19,12 @@
             android:text="找到照片如下\n"/>
     </androidx.appcompat.widget.LinearLayoutCompat>
     <androidx.appcompat.widget.LinearLayoutCompat
-        android:layout_weight="1"
+        android:layout_width="2dp"
+        android:layout_height="match_parent"
+        android:background="@color/black">
+    </androidx.appcompat.widget.LinearLayoutCompat>
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:layout_weight="2"
         android:layout_width="0dp"
         android:orientation="vertical"
         android:layout_height="match_parent">
@@ -28,12 +33,28 @@
             android:id="@+id/tv_limit"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:text="照片数量限制：2"/>
+            android:gravity="center"
+            android:text="照片数量限制：1000"/>
+        <TextView
+            android:layout_weight="1"
+            android:id="@+id/tv_uptotle"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:gravity="center"
+            android:text="累计上传数量："/>
+        <TextView
+            android:layout_weight="1"
+            android:id="@+id/tv_pathArray"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:gravity="center"
+            android:text="检索路径"/>
         <TextView
             android:layout_weight="1"
             android:id="@+id/tv_got"
             android:layout_width="match_parent"
             android:layout_height="0dp"
+            android:gravity="center"
             android:text="Hello World!"/>
     </androidx.appcompat.widget.LinearLayoutCompat>
 
